@@ -79,7 +79,7 @@ Tests/NotchBuddyCoreTests/*Tests.swift
 
 ---
 
-### Задача 1: Репозиторий и риг персонажа (контрольная точка с пользователем)
+### Task 1: Репозиторий и риг персонажа (контрольная точка с пользователем)
 
 **Файлы:**
 - Создать: `.gitignore`, `tools/rig/requirements.txt`, `tools/rig/riglib.py`, `tools/rig/cut.py`, `tools/rig/check.py`, `tools/rig/sheet.py`, `Assets/Character/{body,arm,head,antenna}.png`, `Assets/Character/rig.json`
@@ -129,7 +129,7 @@ Tests/NotchBuddyCoreTests/*Tests.swift
 
 ---
 
-### Задача 2: Каркас пакета, геометрия и окно челки
+### Task 2: Каркас пакета, геометрия и окно челки
 
 **Файлы:**
 - Создать: `Package.swift`, `Sources/NotchBuddyCore/Notch/NotchGeometry.swift`, `Tests/NotchBuddyCoreTests/NotchGeometryTests.swift`, `Sources/NotchBuddy/{AppDelegate,AppModel,NotchPanel,NotchController,NotchView}.swift`, `scripts/Info.plist`, `scripts/build-app.sh`
@@ -188,7 +188,7 @@ public struct NotchGeometry: Equatable, Sendable {
 
 ---
 
-### Задача 3: Ядро буфера (TDD)
+### Task 3: Ядро буфера (TDD)
 
 **Файлы:**
 - Создать: `Sources/NotchBuddyCore/Clipboard/{ClipboardItem,PasteboardSnapshot,ClipboardHistory,PasteboardChangeTracker}.swift`
@@ -257,7 +257,7 @@ public struct PasteboardChangeTracker: Sendable {
 
 ---
 
-### Задача 4: Буфер — наблюдатель и UI панели
+### Task 4: Буфер — наблюдатель и UI панели
 
 **Файлы:**
 - Создать: `Sources/NotchBuddy/PasteboardWatcher.swift`, `Sources/NotchBuddy/ClipboardListView.swift`
@@ -293,7 +293,7 @@ var justCopiedID: UUID?                  // отметка «Скопирова�
 
 ---
 
-### Задача 5: Персонаж — риг, пружины, отрисовка
+### Task 5: Персонаж — риг, пружины, отрисовка
 
 **Файлы:**
 - Создать: `Sources/NotchBuddyCore/Character/{Rig,Pose,Spring,PoseAnimator}.swift`, `Sources/NotchBuddy/{CharacterAssets,CharacterModel,CharacterView}.swift`
@@ -356,7 +356,7 @@ public struct PoseAnimator: Sendable {
 
 ---
 
-### Задача 6: Поведение — мозг, реакции, ввод
+### Task 6: Поведение — мозг, реакции, ввод
 
 **Файлы:**
 - Создать: `Sources/NotchBuddyCore/Character/{BehaviorBrain,Reaction,SeededRandom}.swift`, `Sources/NotchBuddy/InputMonitor.swift`
@@ -406,7 +406,7 @@ public mutating func play(_ reaction: Reaction)
 
 ---
 
-### Задача 7: Ночь, сон, энергия
+### Task 7: Ночь, сон, энергия
 
 **Файлы:**
 - Создать: `Sources/NotchBuddyCore/Character/NightSchedule.swift`, `Tests/NotchBuddyCoreTests/NightScheduleTests.swift`
