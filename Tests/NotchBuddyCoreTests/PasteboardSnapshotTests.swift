@@ -70,4 +70,19 @@ import Testing
         let s = PasteboardSnapshot(types: ["public.url"], urlString: "https://a.com")
         #expect(s.classify() == .link(URL(string: "https://a.com")!))
     }
+
+    @Test func hugeUnbrokenTextClassifiesQuickly() {  // minified JSON, base64: no whitespace to stop a scan early
+        let s = PasteboardSnapshot(types: ["public.utf8-plain-text"], string: String(repeating: "a", count: 5_000_000))
+        let clock = ContinuousClock()
+        var result: ClipboardItem.Content?
+        let elapsed = clock.measure { result = s.classify() }
+        #expect(result != nil)
+        #expect(elapsed < .milliseconds(20))
+    }
+
+    @Test func copiedImageWithItsAddressIsImage() {  // e.g. Safari "Copy Image" may add the URL as text
+        let s = PasteboardSnapshot(types: ["public.tiff", "public.url", "public.utf8-plain-text"],
+                                   string: "https://x.org/y.jpg", urlString: "https://x.org/y.jpg", tiff: Data([7]))
+        #expect(s.classify() == .image(Data([7]), uti: "public.tiff"))
+    }
 }

@@ -27,18 +27,29 @@ public struct PasteboardSnapshot: Equatable, Sendable {
     public func classify() -> ClipboardItem.Content? {
         if isIgnored { return nil }
         if let string, !string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            return Self.webURL(string).map(ClipboardItem.Content.link) ?? .text(string)
+            guard let url = Self.webURL(string) else { return .text(string) }
+            return image ?? .link(url)  // a copied image may carry its own address as text: keep the picture
         }
-        if let png { return .image(png, uti: "public.png") }
-        if let tiff { return .image(tiff, uti: "public.tiff") }
+        if let image { return image }
         if let urlString, let url = Self.webURL(urlString) { return .link(url) }
         return nil
     }
 
+    private var image: ClipboardItem.Content? {
+        if let png { return .image(png, uti: "public.png") }
+        if let tiff { return .image(tiff, uti: "public.tiff") }
+        return nil
+    }
+
+    /// Longer than any link worth keeping; also keeps a multi-megabyte paste from being scanned.
+    static let maxURLLength = 8192
+
     /// A single http(s) URL with a host and no whitespace inside.
     static func webURL(_ string: String) -> URL? {
+        guard string.utf8.count <= maxURLLength else { return nil }
         let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.contains(where: \.isWhitespace),
+        guard trimmed.prefix(4).lowercased() == "http",
+              !trimmed.unicodeScalars.contains(where: CharacterSet.whitespacesAndNewlines.contains),
               let url = URL(string: trimmed),
               let scheme = url.scheme?.lowercased(), scheme == "http" || scheme == "https",
               url.host() != nil
