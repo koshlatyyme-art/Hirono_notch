@@ -36,7 +36,8 @@ struct NotchView: View {
 
             if !model.isExpanded {
                 if let assets {
-                    CharacterView(assets: assets, pose: character.pose, frame: "portrait", height: Self.portraitHeight)
+                    CharacterView(assets: assets, pose: character.pose, time: character.time, frame: "portrait",
+                                  height: Self.portraitHeight)
                         .frame(width: NotchGeometry.earWidth, height: notch.height)
                         .contentShape(Rectangle())
                         .contextMenu { menu }
@@ -62,7 +63,7 @@ struct NotchView: View {
                    value: model.isExpanded)
         .animation(.easeOut(duration: 0.2), value: model.showsRightEar)
         .onChange(of: model.isExpanded, initial: true) { _, expanded in
-            character.setFrameRate(expanded ? 60 : 30)
+            character.isExpanded = expanded
         }
     }
 
@@ -70,7 +71,8 @@ struct NotchView: View {
         HStack(alignment: .bottom, spacing: 8) {
             Group {
                 if let assets {
-                    CharacterView(assets: assets, pose: character.pose, frame: "full", height: Self.fullHeight)
+                    CharacterView(assets: assets, pose: character.pose, time: character.time, frame: "full",
+                                  height: Self.fullHeight)
                         .contextMenu { menu }
                 }
             }

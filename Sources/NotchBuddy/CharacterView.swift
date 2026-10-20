@@ -5,8 +5,13 @@ import SwiftUI
 struct CharacterView: View {
     static let nightTint = (red: 0x4D / 255.0, green: 0x55 / 255.0, blue: 0x73 / 255.0)
 
+    /// Canvas point the sleeping "z" rise from (just off the top right of the head), and their cycle.
+    static let snoreOrigin = CGPoint(x: 400, y: 190)
+    static let snorePeriod = 2.4
+
     let assets: CharacterAssets
     let pose: Pose
+    let time: Double
     let frame: String
     let height: CGFloat
 
@@ -29,6 +34,9 @@ struct CharacterView: View {
             }
             ForEach(rig.glows, id: \.name) { glow in
                 glowView(glow, world: world, scale: scale)
+            }
+            if pose.sleep > 0.01 {
+                snore(from: Self.snoreOrigin.applying(world["head"] ?? .identity), scale: scale, crop: crop)
             }
         }
         .frame(width: canvas.width, height: canvas.height, alignment: .topLeading)
@@ -53,7 +61,7 @@ struct CharacterView: View {
         if strength > 0.01 {
             let center = CGPoint(x: glow.center[0], y: glow.center[1]).applying(world[glow.parent] ?? .identity)
             // A flash swells and burns white-hot in the middle, so it reads even at notch size.
-            let radius = glow.radius * scale * (1 + 1.6 * flash)
+            let radius = glow.radius * scale * (1 + 1.6 * flash + 0.8 * pose.night * glow.night)
             let color = Color(hex: glow.color)
             Circle()
                 .fill(RadialGradient(stops: [  // ≈ (1 − d)², like the preview sheet
@@ -66,6 +74,20 @@ struct CharacterView: View {
                 .frame(width: radius * 2, height: radius * 2)
                 .position(x: center.x * scale, y: center.y * scale)
                 .blendMode(.plusLighter)
+        }
+    }
+
+    /// Three "z" drifting up and fading, staggered over one cycle. Sized to the frame so they read in the ear too.
+    private func snore(from origin: CGPoint, scale: CGFloat, crop: CGRect) -> some View {
+        let unit = crop.height * scale  // the frame's height in points
+        return ForEach(0..<3, id: \.self) { i in
+            let phase = (time / Self.snorePeriod + Double(i) / 3).truncatingRemainder(dividingBy: 1)
+            Text("z")
+                .font(.system(size: unit * (0.14 + 0.1 * phase), weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+                .opacity(pose.sleep * sin(.pi * phase))
+                .position(x: origin.x * scale + unit * (0.1 * phase + 0.04 * sin(2 * .pi * phase)),
+                          y: origin.y * scale - unit * 0.35 * phase)
         }
     }
 

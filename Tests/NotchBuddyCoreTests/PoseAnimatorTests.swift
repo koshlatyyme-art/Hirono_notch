@@ -38,3 +38,26 @@ import Testing
         #expect(poses.last!.night > 0.95)
     }
 }
+
+@Suite struct PoseAnimatorSettlingTests {
+    let dt = 1.0 / 60
+
+    @Test func settlesWhenLeftAlone() {
+        var a = PoseAnimator()
+        for i in 0..<Int(3 / dt) { _ = a.step(dt: dt, time: Double(i) * dt, targets: PoseTargets(), night: false) }
+        #expect(a.isSettled)
+    }
+
+    @Test func notSettledWhileReacting() {
+        var a = PoseAnimator()
+        a.play(.jump)
+        _ = a.step(dt: dt, time: 0, targets: PoseTargets(), night: false)
+        #expect(!a.isSettled)
+    }
+
+    @Test func notSettledWhileTickled() {
+        var a = PoseAnimator()
+        for i in 0..<Int(3 / dt) { _ = a.step(dt: dt, time: Double(i) * dt, targets: PoseTargets(wiggle: true), night: false) }
+        #expect(!a.isSettled)
+    }
+}

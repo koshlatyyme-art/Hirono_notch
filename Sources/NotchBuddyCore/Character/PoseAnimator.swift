@@ -28,6 +28,17 @@ public struct PoseAnimator: Sendable {
 
     public init() {}
 
+    private static var allSprings: [WritableKeyPath<Self, Spring>] {
+        [\.lean, \.headTilt, \.headTurn, \.arm, \.antenna, \.bounce, \.sleep, \.night, \.heartGlow, \.antennaGlow]
+    }
+
+    /// Nothing is moving except the breath: the renderer can slow down.
+    public var isSettled: Bool {
+        tracks.isEmpty && Self.allSprings.allSatisfy {
+            abs(self[keyPath: $0].velocity) < 0.001 && abs(self[keyPath: $0].value - self[keyPath: $0].target) < 0.002
+        }
+    }
+
     /// Starts a reaction: kicks (bounce, glow flashes) land now, sways play out over its duration.
     public mutating func play(_ reaction: Reaction) {
         switch reaction {
@@ -82,8 +93,7 @@ public struct PoseAnimator: Sendable {
         tracks.removeAll { $0.elapsed >= $0.reaction.duration }
 
         let headVelocity = headTilt.velocity + lean.velocity
-        for keyPath in [\Self.lean, \.headTilt, \.headTurn, \.arm, \.antenna, \.bounce, \.sleep, \.night,
-                        \.heartGlow, \.antennaGlow] as [WritableKeyPath<Self, Spring>] {
+        for keyPath in Self.allSprings {
             self[keyPath: keyPath].step(dt: dt)
         }
         antenna.impulse(-Self.antennaInertia * (headTilt.velocity + lean.velocity - headVelocity))
