@@ -1,0 +1,5 @@
+.build/
+build/
+tools/rig/.venv/
+.DS_Store
+.superpowers/
