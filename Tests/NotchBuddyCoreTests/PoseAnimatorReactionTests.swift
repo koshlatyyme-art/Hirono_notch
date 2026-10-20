@@ -47,3 +47,18 @@ import Testing
         #expect(arms.max()! - arms.min()! > 0.1)
     }
 }
+
+@Suite struct PoseAnimatorQueueTests {
+    let dt = 1.0 / 60
+
+    func poses(playing reaction: Reaction, times: Int) -> [Pose] {
+        var animator = PoseAnimator()
+        for _ in 0..<times { animator.play(reaction) }
+        return (0..<Int(1.2 / dt)).map { animator.step(dt: dt, time: Double($0) * dt, targets: PoseTargets(), night: false) }
+    }
+
+    @Test(arguments: [Reaction.stretch, .shakeHead, .alienWiggle])
+    func repeatedIdleActionsDoNotStack(reaction: Reaction) {  // e.g. queued while the display slept
+        #expect(poses(playing: reaction, times: 10) == poses(playing: reaction, times: 1))
+    }
+}

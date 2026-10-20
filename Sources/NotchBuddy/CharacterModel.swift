@@ -37,9 +37,11 @@ final class CharacterModel {
         if let reaction = brain.handle(event, now: .now) { animator.play(reaction) }
     }
 
-    /// Once a second.
+    /// Once a second. Idle acts are skipped while nothing is drawn, so they don't all play at once later.
     func tick(systemIdle: TimeInterval) {
-        if let reaction = brain.tick(now: .now, systemIdle: systemIdle) { animator.play(reaction) }
+        if let reaction = brain.tick(now: .now, systemIdle: systemIdle), link?.isPaused != true {
+            animator.play(reaction)
+        }
         updateNight()
     }
 

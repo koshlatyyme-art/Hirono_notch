@@ -57,6 +57,7 @@ public struct PoseAnimator: Sendable {
         case .stretch, .shakeHead, .alienWiggle:
             break
         }
+        tracks.removeAll { $0.reaction == reaction }  // the same act again restarts it rather than doubling it
         tracks.append(Track(reaction: reaction))
     }
 
