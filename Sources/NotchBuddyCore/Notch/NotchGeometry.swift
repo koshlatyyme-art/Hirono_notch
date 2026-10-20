@@ -4,7 +4,8 @@ import CoreGraphics
 public struct NotchGeometry: Equatable, Sendable {
     public static let fallbackNotchSize = CGSize(width: 190, height: 32)
     public static let earWidth: CGFloat = 44
-    public static let expandedSize = CGSize(width: 520, height: 270)
+    /// Just tall enough for the seated character under the notch.
+    public static let expandedSize = CGSize(width: 520, height: 170)
 
     public let notchRect: CGRect
     public let isHardwareNotch: Bool

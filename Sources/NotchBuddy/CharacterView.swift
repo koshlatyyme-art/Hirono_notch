@@ -52,11 +52,12 @@ struct CharacterView: View {
         let strength = max(pose.night * glow.night, flash)
         if strength > 0.01 {
             let center = CGPoint(x: glow.center[0], y: glow.center[1]).applying(world[glow.parent] ?? .identity)
-            let radius = glow.radius * scale
+            // A flash swells and burns white-hot in the middle, so it reads even at notch size.
+            let radius = glow.radius * scale * (1 + 1.6 * flash)
             let color = Color(hex: glow.color)
             Circle()
                 .fill(RadialGradient(stops: [  // ≈ (1 − d)², like the preview sheet
-                    .init(color: color.opacity(strength), location: 0),
+                    .init(color: color.mix(with: .white, by: 0.7 * flash).opacity(strength), location: 0),
                     .init(color: color.opacity(strength * 0.56), location: 0.25),
                     .init(color: color.opacity(strength * 0.25), location: 0.5),
                     .init(color: color.opacity(strength * 0.06), location: 0.75),

@@ -2,11 +2,11 @@ import AppKit
 import NotchBuddyCore
 import QuartzCore
 
-/// Steps the character's springs on every display frame and publishes the pose.
+/// Feeds events to the brain, steps the springs on every display frame, and publishes the pose.
 @Observable @MainActor
 final class CharacterModel {
     private(set) var pose = Pose.rest
-    @ObservationIgnored var targets = PoseTargets()
+    @ObservationIgnored private var brain = BehaviorBrain(now: .now, seed: .random(in: 0...UInt64.max))
     @ObservationIgnored private var animator = PoseAnimator()
     @ObservationIgnored private var link: CADisplayLink?
     @ObservationIgnored private var lastTimestamp: CFTimeInterval?
@@ -22,6 +22,16 @@ final class CharacterModel {
         setFrameRate(30)
     }
 
+    /// `characterRect`: where the character is visible right now, in screen coordinates.
+    func handle(_ event: BrainEvent, characterRect: CGRect) {
+        brain.characterRect = characterRect
+        if let reaction = brain.handle(event, now: .now) { animator.play(reaction) }
+    }
+
+    func tick(systemIdle: TimeInterval) {
+        if let reaction = brain.tick(now: .now, systemIdle: systemIdle) { animator.play(reaction) }
+    }
+
     func setFrameRate(_ fps: Float) {
         link?.preferredFrameRateRange = CAFrameRateRange(minimum: min(15, fps), maximum: fps, preferred: fps)
     }
@@ -29,7 +39,7 @@ final class CharacterModel {
     private func tick(at timestamp: CFTimeInterval) {
         let dt = lastTimestamp.map { timestamp - $0 } ?? 1.0 / 60
         lastTimestamp = timestamp
-        pose = animator.step(dt: dt, time: timestamp, targets: targets, night: forceNight)
+        pose = animator.step(dt: dt, time: timestamp, targets: brain.targets, night: forceNight)
     }
 }
 

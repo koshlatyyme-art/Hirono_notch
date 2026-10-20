@@ -36,6 +36,8 @@ public struct LayerTransform: Equatable, Sendable {
     /// Canvas pixels.
     public var offset = CGVector.zero
     public var scaleY = 1.0
+    /// Uniform, about the pivot.
+    public var scale = 1.0
 
     public static let identity = LayerTransform()
 }
@@ -55,9 +57,11 @@ public func transforms(for pose: Pose, rig: Rig) -> [String: LayerTransform] {
                                scaleY: 1 + 0.015 * pose.breath))
     set("head", LayerTransform(rotation: clamp(pose.headTilt) * rig.limit("head") + pose.sleep * 0.8 * rig.limit("head"),
                                turn: clamp(pose.headTurn) * rig.limit("headTurn"),
-                               offset: CGVector(dx: 0, dy: pose.sleep * 0.03 * height)))
+                               offset: CGVector(dx: clamp(pose.headTurn) * 0.015 * rig.canvasSize.width,
+                                                dy: pose.sleep * 0.03 * height)))
     set("arm", LayerTransform(rotation: clamp(pose.arm) * rig.limit("arm")))
     set("antenna", LayerTransform(rotation: clamp(pose.antenna) * rig.limit("antenna")))
+    set("heart", LayerTransform(scale: 1 + 0.3 * clamp(pose.heartGlow, 0, 1)))  // pops when it flashes
     return out
 }
 
@@ -68,7 +72,7 @@ public func worldTransforms(for pose: Pose, rig: Rig) -> [String: CGAffineTransf
         let t = local[layer.name] ?? .identity
         let px = layer.pivot[0], py = layer.pivot[1]
         return CGAffineTransform(translationX: -px, y: -py)
-            .concatenating(CGAffineTransform(scaleX: cos(t.turn * .pi / 180), y: t.scaleY))
+            .concatenating(CGAffineTransform(scaleX: t.scale * cos(t.turn * .pi / 180), y: t.scale * t.scaleY))
             .concatenating(CGAffineTransform(rotationAngle: t.rotation * .pi / 180))
             .concatenating(CGAffineTransform(translationX: px + t.offset.dx, y: py + t.offset.dy))
     }

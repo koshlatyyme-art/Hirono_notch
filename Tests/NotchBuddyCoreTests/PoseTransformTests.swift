@@ -37,6 +37,16 @@ import Testing
     @Test func headTurnFollowsLimit() {
         #expect(transforms(for: Pose(headTurn: -1), rig: rig)["head"]?.turn == -rig.limits["headTurn"]!)
     }
+
+    @Test func heartPopsWhenItFlashes() {
+        #expect(transforms(for: .rest, rig: rig)["heart"]?.scale == 1)
+        #expect(transforms(for: Pose(heartGlow: 1), rig: rig)["heart"]!.scale > 1.2)
+    }
+
+    @Test func headTurnShiftsTowardTheTurn() {  // foreshortening alone looks the same both ways
+        #expect(transforms(for: Pose(headTurn: -1), rig: rig)["head"]!.offset.dx < 0)
+        #expect(transforms(for: Pose(headTurn: 1), rig: rig)["head"]!.offset.dx > 0)
+    }
 }
 
 @Suite struct WorldTransformTests {
@@ -65,6 +75,13 @@ import Testing
         let w = worldTransforms(for: Pose(headTilt: 1), rig: rig)
         let p = pivot("antenna")
         #expect(close(p.applying(w["antenna"]!), p.applying(w["head"]!)))
+    }
+
+    @Test func heartPopKeepsItsPivot() {
+        let w = worldTransforms(for: Pose(heartGlow: 1), rig: rig)
+        let p = pivot("heart")
+        #expect(close(p.applying(w["heart"]!), p))
+        #expect(!close(CGPoint(x: p.x + 10, y: p.y).applying(w["heart"]!), CGPoint(x: p.x + 10, y: p.y)))
     }
 
     @Test func positiveTiltIsClockwiseOnScreen() {

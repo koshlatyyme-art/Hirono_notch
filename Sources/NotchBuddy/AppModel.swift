@@ -16,10 +16,24 @@ final class AppModel {
 
     /// Called when a drag that started in the panel is over (the mouse button is up).
     @ObservationIgnored var onDragEnded: (() -> Void)?
+    /// Called for every copy made in another app, readable or not.
+    @ObservationIgnored var onExternalCopy: (() -> Void)?
     @ObservationIgnored private var watcher: PasteboardWatcher?
     @ObservationIgnored private var dragTimer: Timer?
 
     var showsRightEar: Bool { !history.items.isEmpty }
+
+    /// Where the character is visible, in screen coordinates: the left ear, or the panel's left column.
+    var characterRect: CGRect {
+        let notch = geometry.notchRect
+        guard isExpanded else {
+            return CGRect(x: notch.minX - NotchGeometry.earWidth, y: notch.minY,
+                          width: NotchGeometry.earWidth, height: notch.height)
+        }
+        let panel = geometry.expandedRect
+        return CGRect(x: panel.minX + NotchView.inset, y: panel.minY + NotchView.inset,
+                      width: NotchView.seatWidth, height: panel.height - notch.height - NotchView.topGap - NotchView.inset)
+    }
 
     /// The black shape currently drawn, in screen coordinates.
     var shapeRect: CGRect {
@@ -77,6 +91,7 @@ final class AppModel {
 
     private func record(_ content: ClipboardItem.Content?) {
         accessDenied = watcher?.isAccessDenied ?? false
+        onExternalCopy?()
         guard let content else { return }
         let item = history.add(content, at: .now)
         let alive = Set(history.items.map(\.id))

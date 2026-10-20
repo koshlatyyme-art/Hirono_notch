@@ -10,7 +10,7 @@ import Testing
     #expect(g.notchRect == CGRect(x: 764, y: 1085, width: 200, height: 32))
     #expect(g.collapsedRect(showsRightEar: true) == CGRect(x: 720, y: 1085, width: 288, height: 32))
     #expect(g.collapsedRect(showsRightEar: false) == CGRect(x: 720, y: 1085, width: 244, height: 32))
-    #expect(g.expandedRect == CGRect(x: 604, y: 847, width: 520, height: 270))
+    #expect(g.expandedRect == CGRect(x: 604, y: 947, width: 520, height: 170))
 }
 
 @Test func fallbackWithoutNotch() {

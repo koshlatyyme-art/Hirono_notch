@@ -48,7 +48,8 @@ def local_transforms(rig, pose):
     t = {layer["name"]: dict(rotation=0.0, turn=0.0, dx=0.0, dy=0.0, scaleY=1.0) for layer in rig["layers"]}
     t["body"].update(rotation=clamp(g("lean")) * lim["body"], scaleY=1 + 0.015 * g("breath"), dy=-g("bounce") * 0.08 * h)
     t["head"].update(rotation=clamp(g("headTilt")) * lim["head"] + g("sleep") * 0.8 * lim["head"],
-                     turn=clamp(g("headTurn")) * lim["headTurn"], dy=g("sleep") * 0.03 * h)
+                     turn=clamp(g("headTurn")) * lim["headTurn"], dx=clamp(g("headTurn")) * 0.015 * rig["canvas"][0],
+                     dy=g("sleep") * 0.03 * h)
     t["arm"].update(rotation=clamp(g("arm")) * lim["arm"])
     t["antenna"].update(rotation=clamp(g("antenna")) * lim["antenna"])
     return t

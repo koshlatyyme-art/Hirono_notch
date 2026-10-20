@@ -98,9 +98,12 @@ struct ClipboardRow: View {
                 Text(url.host() ?? url.absoluteString)
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(.white)
-                Text(url.path() + (url.query().map { "?" + $0 } ?? ""))
-                    .font(.system(size: 11))
-                    .foregroundStyle(.white.opacity(0.5))
+                let rest = url.path() + (url.query().map { "?" + $0 } ?? "")
+                if !rest.isEmpty && rest != "/" {
+                    Text(rest)
+                        .font(.system(size: 11))
+                        .foregroundStyle(.white.opacity(0.5))
+                }
             }
             .lineLimit(1)
         case .image:
