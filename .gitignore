@@ -15,3 +15,7 @@ tools/rig/.venv/
 *.bmp
 *.svg
 *.icns
+# local agent tooling
+.agents/
+.claude/
+skills-lock.json
