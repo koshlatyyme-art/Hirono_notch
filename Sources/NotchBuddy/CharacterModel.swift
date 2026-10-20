@@ -16,7 +16,11 @@ final class CharacterModel {
     @ObservationIgnored private var link: CADisplayLink?
     @ObservationIgnored private var frameRate: Float = 0
     @ObservationIgnored private var lastTimestamp: CFTimeInterval?
+    /// When the springs last moved; the frame rate drops only after a short calm, so it doesn't flap.
+    @ObservationIgnored private var lastMotion: CFTimeInterval = 0
     @ObservationIgnored private var observers: [NSObjectProtocol] = []
+    @ObservationIgnored private var displaysAsleep = false
+    @ObservationIgnored private var isVisible = true
     /// Debug: `-NotchBuddyForceNight YES`.
     @ObservationIgnored private let forceNight = UserDefaults.standard.bool(forKey: "NotchBuddyForceNight")
 
@@ -29,6 +33,13 @@ final class CharacterModel {
         frameRate = 0
         updateNight()
         if observers.isEmpty { observeDisplaySleep() }
+        updatePaused()
+    }
+
+    /// False while the panel is fully covered (screen saver, lock screen, another user's session).
+    func setVisible(_ visible: Bool) {
+        isVisible = visible
+        updatePaused()
     }
 
     /// `characterRect`: where the character is visible right now, in screen coordinates.
@@ -50,8 +61,9 @@ final class CharacterModel {
         lastTimestamp = timestamp
         time = timestamp
         pose = animator.step(dt: dt, time: timestamp, targets: brain.targets, night: isNight)
-        let settled = animator.isSettled
-        setFrameRate(isExpanded ? 60 : !settled ? 30 : brain.state == .sleeping ? 10 : 15)
+        if !animator.isSettled { lastMotion = timestamp }
+        let calm = timestamp - lastMotion > 0.5
+        setFrameRate(isExpanded ? 60 : !calm ? 30 : brain.state == .sleeping ? 10 : 15)
     }
 
     private func setFrameRate(_ fps: Float) {
@@ -64,17 +76,27 @@ final class CharacterModel {
         isNight = forceNight || NightSchedule.isNight(.now)
     }
 
-    /// No frames at all while the displays are off.
+    /// No frames at all while nobody can see them.
+    private func updatePaused() {
+        let paused = displaysAsleep || !isVisible
+        if link?.isPaused == true && !paused { lastTimestamp = nil }
+        link?.isPaused = paused
+    }
+
     private func observeDisplaySleep() {
         let center = NSWorkspace.shared.notificationCenter
         observers.append(center.addObserver(forName: NSWorkspace.screensDidSleepNotification, object: nil, queue: .main) {
-            [weak self] _ in MainActor.assumeIsolated { self?.link?.isPaused = true }
+            [weak self] _ in
+            MainActor.assumeIsolated {
+                self?.displaysAsleep = true
+                self?.updatePaused()
+            }
         })
         observers.append(center.addObserver(forName: NSWorkspace.screensDidWakeNotification, object: nil, queue: .main) {
             [weak self] _ in
             MainActor.assumeIsolated {
-                self?.lastTimestamp = nil
-                self?.link?.isPaused = false
+                self?.displaysAsleep = false
+                self?.updatePaused()
             }
         })
     }

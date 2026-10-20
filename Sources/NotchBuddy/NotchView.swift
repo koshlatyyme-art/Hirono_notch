@@ -36,8 +36,7 @@ struct NotchView: View {
 
             if !model.isExpanded {
                 if let assets {
-                    CharacterView(assets: assets, pose: character.pose, time: character.time, frame: "portrait",
-                                  height: Self.portraitHeight)
+                    LiveCharacter(character: character, assets: assets, frame: "portrait", height: Self.portraitHeight)
                         .frame(width: NotchGeometry.earWidth, height: notch.height)
                         .contentShape(Rectangle())
                         .contextMenu { menu }
@@ -71,8 +70,7 @@ struct NotchView: View {
         HStack(alignment: .bottom, spacing: 8) {
             Group {
                 if let assets {
-                    CharacterView(assets: assets, pose: character.pose, time: character.time, frame: "full",
-                                  height: Self.fullHeight)
+                    LiveCharacter(character: character, assets: assets, frame: "full", height: Self.fullHeight)
                         .contextMenu { menu }
                 }
             }
@@ -86,5 +84,17 @@ struct NotchView: View {
         Button("Очистить историю") { model.clearHistory() }
         Divider()
         Button("Выйти") { NSApp.terminate(nil) }
+    }
+}
+
+/// Reads the per-frame pose in its own body, so only the character redraws each frame, not the whole notch.
+private struct LiveCharacter: View {
+    let character: CharacterModel
+    let assets: CharacterAssets
+    let frame: String
+    let height: CGFloat
+
+    var body: some View {
+        CharacterView(assets: assets, pose: character.pose, time: character.time, frame: frame, height: height)
     }
 }

@@ -23,13 +23,14 @@ struct CharacterView: View {
         let world = worldTransforms(for: pose, rig: rig)
         ZStack(alignment: .topLeading) {
             ForEach(rig.layers, id: \.name) { layer in
-                if let image = assets.images[layer.name] {
+                let opacity = NotchBuddyCore.opacity(of: layer, in: pose)
+                if let image = assets.images[layer.name], opacity > 0.001 {  // hidden overlays cost nothing
                     Image(decorative: image, scale: 1)
                         .resizable()
                         .interpolation(.high)
                         .frame(width: canvas.width, height: canvas.height)
                         .colorMultiply(tint)
-                        .opacity(NotchBuddyCore.opacity(of: layer, in: pose))
+                        .opacity(opacity)
                         .transformEffect(Self.inView(world[layer.name] ?? .identity, scale: scale))
                 }
             }

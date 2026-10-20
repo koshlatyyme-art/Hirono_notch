@@ -30,6 +30,14 @@ final class NotchController {
         ) { [weak self] _ in
             MainActor.assumeIsolated { self?.layout() }
         }
+        NotificationCenter.default.addObserver(
+            forName: NSWindow.didChangeOcclusionStateNotification, object: panel, queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                self.character.setVisible(self.panel.occlusionState.contains(.visible))
+            }
+        }
         let mask: NSEvent.EventTypeMask = [.mouseMoved, .leftMouseDragged]
         if let global = NSEvent.addGlobalMonitorForEvents(matching: mask, handler: { [weak self] _ in
             MainActor.assumeIsolated { self?.mouseMoved() }
