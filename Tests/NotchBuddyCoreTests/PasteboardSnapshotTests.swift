@@ -8,6 +8,12 @@ import Testing
         #expect(s.classify() == nil)
     }
 
+    @Test func ignoredIsKnownFromTypesAlone() {
+        #expect(PasteboardSnapshot(types: ["public.utf8-plain-text", "org.nspasteboard.ConcealedType"]).isIgnored)
+        #expect(PasteboardSnapshot(types: ["public.file-url"]).isIgnored)
+        #expect(!PasteboardSnapshot(types: ["public.utf8-plain-text"]).isIgnored)
+    }
+
     @Test func transientIsIgnored() {
         let s = PasteboardSnapshot(types: ["org.nspasteboard.TransientType", "public.utf8-plain-text"], string: "x")
         #expect(s.classify() == nil)

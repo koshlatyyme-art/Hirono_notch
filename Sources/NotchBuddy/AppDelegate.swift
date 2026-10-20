@@ -16,5 +16,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         controller = NotchController(model: model)
+        model.startWatchingPasteboard()
     }
 }

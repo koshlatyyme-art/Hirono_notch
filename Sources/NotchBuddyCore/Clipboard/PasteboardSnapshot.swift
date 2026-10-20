@@ -21,8 +21,11 @@ public struct PasteboardSnapshot: Equatable, Sendable {
         self.tiff = tiff
     }
 
+    /// Decided from the types alone, so a password is never read at all.
+    public var isIgnored: Bool { types.contains(where: Self.ignoredTypes.contains) }
+
     public func classify() -> ClipboardItem.Content? {
-        if types.contains(where: Self.ignoredTypes.contains) { return nil }
+        if isIgnored { return nil }
         if let string, !string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             return Self.webURL(string).map(ClipboardItem.Content.link) ?? .text(string)
         }
