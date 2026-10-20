@@ -25,3 +25,22 @@ import Testing
                           auxiliaryTopLeft: nil, auxiliaryTopRight: nil)
     #expect(g.notchRect == CGRect(x: 2593, y: 848, width: 190, height: 32))
 }
+
+@Test func hardwareNotchOnScreenLeftOfMain() {  // built-in display arranged left of an external main display
+    let frame = CGRect(x: -1728, y: 0, width: 1728, height: 1117)
+    let global = NotchGeometry(screenFrame: frame, safeAreaTop: 32,
+                               auxiliaryTopLeft: CGRect(x: -1728, y: 1085, width: 771, height: 32),
+                               auxiliaryTopRight: CGRect(x: -772, y: 1085, width: 772, height: 32))
+    let local = NotchGeometry(screenFrame: frame, safeAreaTop: 32,
+                              auxiliaryTopLeft: CGRect(x: 0, y: 1085, width: 771, height: 32),
+                              auxiliaryTopRight: CGRect(x: 956, y: 1085, width: 772, height: 32))
+    let expected = CGRect(x: -957, y: 1085, width: 185, height: 32)
+    #expect(global.notchRect == expected)
+    #expect(local.notchRect == expected)
+}
+
+@Test func screenChoicePrefersTheNotch() {
+    #expect(NotchGeometry.screenIndex(safeAreaTops: [0, 32]) == 1)
+    #expect(NotchGeometry.screenIndex(safeAreaTops: [32, 0]) == 0)
+    #expect(NotchGeometry.screenIndex(safeAreaTops: [0, 0]) == 0)  // no notch: the main (menu bar) screen
+}

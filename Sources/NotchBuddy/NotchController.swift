@@ -45,8 +45,9 @@ final class NotchController {
     }
 
     private func layout() {
-        let screen = NSScreen.screens.first { $0.safeAreaInsets.top > 0 } ?? NSScreen.main
-        guard let screen else { return }
+        let screens = NSScreen.screens
+        guard !screens.isEmpty else { return }
+        let screen = screens[NotchGeometry.screenIndex(safeAreaTops: screens.map(\.safeAreaInsets.top))]
         model.geometry = NotchGeometry(
             screenFrame: screen.frame, safeAreaTop: screen.safeAreaInsets.top,
             auxiliaryTopLeft: screen.auxiliaryTopLeftArea, auxiliaryTopRight: screen.auxiliaryTopRightArea

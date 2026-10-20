@@ -14,8 +14,9 @@ public struct NotchGeometry: Equatable, Sendable {
     public init(screenFrame: CGRect, safeAreaTop: CGFloat, auxiliaryTopLeft: CGRect?, auxiliaryTopRight: CGRect?) {
         self.screenFrame = screenFrame
         if safeAreaTop > 0, let left = auxiliaryTopLeft, let right = auxiliaryTopRight {
-            notchRect = CGRect(x: left.maxX, y: screenFrame.maxY - safeAreaTop,
-                               width: right.minX - left.maxX, height: safeAreaTop)
+            // Only the areas' widths are used, so it doesn't matter which coordinate space they come in.
+            notchRect = CGRect(x: screenFrame.minX + left.width, y: screenFrame.maxY - safeAreaTop,
+                               width: screenFrame.width - left.width - right.width, height: safeAreaTop)
             isHardwareNotch = true
         } else {
             let size = Self.fallbackNotchSize
@@ -39,4 +40,9 @@ public struct NotchGeometry: Equatable, Sendable {
     }
 
     public var panelFrame: CGRect { expandedRect.union(collapsedRect(showsRightEar: true)) }
+
+    /// The screen with a notch, else the first one (the menu bar's screen).
+    public static func screenIndex(safeAreaTops: [CGFloat]) -> Int {
+        safeAreaTops.firstIndex { $0 > 0 } ?? 0
+    }
 }
