@@ -7,7 +7,7 @@ import Testing
 
     @Test func restIsStill() {
         let t = transforms(for: .rest, rig: rig)
-        #expect(Set(t.keys) == ["arm", "body", "head", "heart", "antenna"])
+        #expect(Set(t.keys) == ["arm", "alienSleep", "body", "head", "heart", "antenna"])
         for (_, layer) in t {
             #expect(layer.rotation == 0)
             #expect(layer.turn == 0)
@@ -69,6 +69,11 @@ import Testing
         let p = pivot("head")
         #expect(!close(p.applying(w["body"]!), p))
         #expect(close(p.applying(w["head"]!), p.applying(w["body"]!)))
+    }
+
+    @Test func closedEyesRideTheArm() {
+        let w = worldTransforms(for: Pose(arm: 1), rig: rig)
+        #expect(w["alienSleep"] == w["arm"])
     }
 
     @Test func antennaRidesTheHead() {

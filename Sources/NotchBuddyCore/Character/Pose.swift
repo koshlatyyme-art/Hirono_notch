@@ -65,6 +65,14 @@ public func transforms(for pose: Pose, rig: Rig) -> [String: LayerTransform] {
     return out
 }
 
+/// How visible a layer is: overlays fade in with the pose value they follow.
+public func opacity(of layer: Rig.Layer, in pose: Pose) -> Double {
+    switch layer.opacityFrom {
+    case "sleep": clamp(pose.sleep, 0, 1)
+    default: 1
+    }
+}
+
 /// Canvas → canvas transform of every layer, its ancestors' motion included (same math as tools/rig/riglib.py).
 public func worldTransforms(for pose: Pose, rig: Rig) -> [String: CGAffineTransform] {
     let local = transforms(for: pose, rig: rig)

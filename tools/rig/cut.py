@@ -42,7 +42,7 @@ ARM = [(712, 0), (932, 0), (932, 800), (740, 800), (700, 822), (668, 760), (650,
 # --- hidden areas to paint in on the layer behind ---
 
 # Robe continuing under the scarf (revealed when the head tilts / drops / turns).
-BODY_UNDER_HEAD = [(332, 780), (420, 790), (520, 770), (590, 700), (640, 600), (690, 600),
+BODY_UNDER_HEAD = [(332, 780), (420, 790), (500, 740), (560, 640), (620, 560), (690, 560),
                    (690, 860), (332, 860)]  # kept inside the robe's outline so it never pokes out
 # Sleeve continuing under the body's shoulder seam, and the strap under the face edge.
 ARM_UNDER_BODY = [(668, 640), (700, 640), (700, 780), (680, 830), (640, 840), (612, 760)]
@@ -51,10 +51,19 @@ ARM_UNDER_HEAD = [(596, 540), (662, 500), (668, 760), (596, 760)]
 HEAD_UNDER_HEART = [(520, 790), (600, 740), (640, 760), (640, 845), (520, 845)]
 HEAD_UNDER_ANTENNA = [(104, 268), (152, 266), (162, 342), (104, 348)]
 
+# The alien's eyes, closed while the character sleeps: an overlay riding the arm.
+ALIEN_EYES_AREA = (730, 250, 910, 420)  # x0, y0, x1, y1
+# Each closed lid: a downward-bowing "‿" from outer to inner corner (inner corners sit lower, like the eyes).
+ALIEN_LIDS = [((750, 326), (786, 342)), ((882, 346), (834, 368))]
+LID_SAG = 8
+LID_COLOR = (28, 52, 38)
+LID_WIDTH = 6
+
 PIVOTS = {"body": (465, 1120), "arm": (668, 770), "head": (465, 820), "antenna": (135, 310),
           "heart": (575, 840)}
 DRAW_ORDER = ["arm", "body", "head", "heart", "antenna"]
 PARENTS = {"body": None, "arm": "body", "head": "body", "heart": "body", "antenna": "head"}
+OVERLAYS = [{"name": "alienSleep", "after": "arm", "parent": "arm", "opacityFrom": "sleep"}]
 FRAMES = {"full": (-100, 40, 1132, 1120), "portrait": (-30, 140, 990, 700)}  # x, y, w, h
 LIMITS = {"body": 3, "head": 10, "headTurn": 20, "arm": 15, "antenna": 25}
 GLOWS = [
@@ -132,6 +141,33 @@ def extend(layer_rgb, layer_a, fill):
     return out_rgb, out_a
 
 
+def alien_sleep_overlay(rgb, alpha):
+    """Green skin over the alien's eyes (glossy highlights included), with a closed lid drawn on each."""
+    x0, y0, x1, y1 = ALIEN_EYES_AREA
+    area = np.zeros(alpha.shape, bool)
+    area[y0:y1, x0:x1] = True
+    dark = (rgb.astype(int).sum(axis=-1) < 150) & (alpha > 0.8) & area
+    n, labels, stats, _ = cv2.connectedComponentsWithStats(dark.astype(np.uint8), connectivity=8)
+    cover = np.zeros(alpha.shape, np.uint8)
+    for i in range(1, n):
+        if stats[i, cv2.CC_STAT_AREA] > 300:
+            pts = np.column_stack(np.nonzero(labels == i)[::-1]).astype(np.int32)
+            cv2.fillConvexPoly(cover, cv2.convexHull(pts), 1)
+    cover = cv2.dilate(cover, np.ones((19, 19), np.uint8))  # the glossy rim reaches past the dark core
+    skin = cv2.inpaint(np.ascontiguousarray(rgb), cover, 9, cv2.INPAINT_TELEA)
+    out_a = cv2.GaussianBlur(cover.astype(np.float32), (5, 5), 0)
+
+    lids = np.zeros(alpha.shape, np.uint8)
+    for (ax, ay), (bx, by) in ALIEN_LIDS:
+        t = np.linspace(0, 1, 24)[:, None]
+        mid = np.array([(ax + bx) / 2, (ay + by) / 2 + 2 * LID_SAG])  # quadratic Bézier control point
+        curve = (1 - t) ** 2 * np.array([ax, ay]) + 2 * (1 - t) * t * mid + t ** 2 * np.array([bx, by])
+        cv2.polylines(lids, [np.round(curve * 16).astype(np.int32)], False, 255, LID_WIDTH, cv2.LINE_AA, shift=4)
+    line = lids.astype(np.float32)[..., None] / 255
+    out_rgb = (skin * (1 - line) + np.array(LID_COLOR, np.float32) * line).astype(np.uint8)
+    return out_rgb, np.maximum(out_a, line[..., 0])
+
+
 def export(rgb, a, path):
     rgba = np.dstack([rgb, (a * 255).round().astype(np.uint8)])
     rgba = np.pad(rgba, ((PAD, PAD), (PAD, PAD), (0, 0)))
@@ -139,6 +175,16 @@ def export(rgb, a, path):
     w, h = im.size
     small = im.convert("RGBa").resize((round(w * EXPORT_SCALE), round(h * EXPORT_SCALE)), Image.LANCZOS)
     small.convert("RGBA").save(path, optimize=True)
+
+
+def layer_entries(sc):
+    entries = []
+    for n in DRAW_ORDER:
+        entries.append({"name": n, "file": f"{n}.png", "parent": PARENTS[n], "pivot": sc(PIVOTS[n])})
+        for o in (o for o in OVERLAYS if o["after"] == n):
+            entries.append({"name": o["name"], "file": f"{o['name']}.png", "parent": o["parent"],
+                            "pivot": sc(PIVOTS[o["parent"]]), "opacityFrom": o["opacityFrom"]})
+    return entries
 
 
 def main():
@@ -180,6 +226,8 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     for name, (lr, la) in layers.items():
         export(lr, la, os.path.join(OUT, f"{name}.png"))
+    lid_rgb, lid_a = alien_sleep_overlay(rgb, alpha)
+    export(lid_rgb, lid_a, os.path.join(OUT, "alienSleep.png"))
 
     s = EXPORT_SCALE
     sc = lambda p: [round((p[0] + PAD) * s, 1), round((p[1] + PAD) * s, 1)]
@@ -187,7 +235,7 @@ def main():
         "canvas": [round((w + 2 * PAD) * s), round((h + 2 * PAD) * s)],
         "frames": {k: sc(f[:2]) + [round(v * s, 1) for v in f[2:]] for k, f in FRAMES.items()},
         "limits": LIMITS,
-        "layers": [{"name": n, "file": f"{n}.png", "parent": PARENTS[n], "pivot": sc(PIVOTS[n])} for n in DRAW_ORDER],
+        "layers": layer_entries(sc),
         "glows": [dict(g, center=sc(g["center"]), radius=round(g["radius"] * s, 1)) for g in GLOWS],
     }
     with open(os.path.join(OUT, "rig.json"), "w") as f:

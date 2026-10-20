@@ -7,6 +7,7 @@ enum RigFixture {
     {"canvas":[586,774],"frames":{"full":[10.0,80.0,566.0,560.0],"portrait":[45.0,130.0,495.0,350.0]},
      "limits":{"body":3,"head":10,"headTurn":20,"arm":15,"antenna":25},
      "layers":[{"name":"arm","file":"arm.png","parent":"body","pivot":[394.0,445.0]},
+               {"name":"alienSleep","file":"alienSleep.png","parent":"arm","pivot":[394.0,445.0],"opacityFrom":"sleep"},
                {"name":"body","file":"body.png","parent":null,"pivot":[292.5,620.0]},
                {"name":"head","file":"head.png","parent":"body","pivot":[292.5,470.0]},
                {"name":"heart","file":"heart.png","parent":"body","pivot":[347.5,480.0]},

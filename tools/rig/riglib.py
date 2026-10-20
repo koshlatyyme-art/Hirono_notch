@@ -86,6 +86,8 @@ def compose(rig, images, pose, glows=True):
     for layer in rig["layers"]:
         warped = cv2.warpAffine(images[layer["name"]], mats[layer["name"]][:2], (w, h), flags=cv2.INTER_LINEAR,
                                 borderMode=cv2.BORDER_CONSTANT, borderValue=0)
+        if layer.get("opacityFrom"):  # overlays fade in with a pose value (mirror of Swift `opacity(of:in:)`)
+            warped = warped * min(max(pose.get(layer["opacityFrom"], 0.0), 0.0), 1.0)
         acc = warped + acc * (1 - warped[..., 3:4])
     night = pose.get("night", 0.0)
     if night > 0:

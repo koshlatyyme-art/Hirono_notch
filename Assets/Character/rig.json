@@ -35,6 +35,16 @@
       ]
     },
     {
+      "name": "alienSleep",
+      "file": "alienSleep.png",
+      "parent": "arm",
+      "pivot": [
+        394.0,
+        445.0
+      ],
+      "opacityFrom": "sleep"
+    },
+    {
       "name": "body",
       "file": "body.png",
       "parent": null,

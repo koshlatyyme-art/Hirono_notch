@@ -29,6 +29,7 @@ struct CharacterView: View {
                         .interpolation(.high)
                         .frame(width: canvas.width, height: canvas.height)
                         .colorMultiply(tint)
+                        .opacity(NotchBuddyCore.opacity(of: layer, in: pose))
                         .transformEffect(Self.inView(world[layer.name] ?? .identity, scale: scale))
                 }
             }

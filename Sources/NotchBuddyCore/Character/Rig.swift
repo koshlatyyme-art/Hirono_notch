@@ -7,6 +7,8 @@ public struct Rig: Codable, Equatable, Sendable {
         public var file: String
         public var parent: String?
         public var pivot: [Double]
+        /// An overlay shown only as much as this pose value ("sleep"); nil = always fully shown.
+        public var opacityFrom: String?
     }
 
     public struct Glow: Codable, Equatable, Sendable {
