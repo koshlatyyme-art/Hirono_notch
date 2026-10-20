@@ -9,15 +9,17 @@ final class NotchController {
     private static let collapseDelay: TimeInterval = 0.3
 
     private let model: AppModel
+    private let character: CharacterModel
     private let panel: NotchPanel
     private var monitors: [Any] = []
     private var hoverTimer: Timer?
     /// Debug: `-NotchBuddyForceExpanded YES` keeps the panel open for screenshots.
     private let forceExpanded = UserDefaults.standard.bool(forKey: "NotchBuddyForceExpanded")
 
-    init(model: AppModel) {
+    init(model: AppModel, character: CharacterModel, assets: CharacterAssets?) {
         self.model = model
-        panel = NotchPanel(rootView: NotchView(model: model))
+        self.character = character
+        panel = NotchPanel(rootView: NotchView(model: model, character: character, assets: assets))
         model.isExpanded = forceExpanded
         layout()
         panel.orderFrontRegardless()
@@ -55,6 +57,7 @@ final class NotchController {
               screen.auxiliaryTopRightArea.map(NSStringFromRect) ?? "nil",
               NSStringFromRect(model.geometry.notchRect))
         panel.setFrame(model.geometry.panelFrame, display: true)
+        character.start(on: screen)
         mouseMoved()
     }
 

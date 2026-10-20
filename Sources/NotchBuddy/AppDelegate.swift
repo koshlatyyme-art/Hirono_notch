@@ -4,6 +4,7 @@ import AppKit
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private let model = AppModel()
+    private let character = CharacterModel()
     private var controller: NotchController?
 
     static func main() {
@@ -15,7 +16,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        controller = NotchController(model: model)
+        let assets = CharacterAssets.load()
+        if assets == nil { NSLog("NotchBuddy: character assets missing from Contents/Resources/Character") }
+        controller = NotchController(model: model, character: character, assets: assets)
         model.startWatchingPasteboard()
     }
 }
