@@ -14,7 +14,7 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-SRC = os.path.join(ROOT, "character.png")
+SRC = os.path.join(ROOT, "Assets", "character.png")
 OUT = os.path.join(ROOT, "Assets", "Character")
 EXPORT_SCALE = 0.5
 PAD = 120  # transparent margin so extreme poses stay on the canvas

@@ -3,18 +3,6 @@ build/
 tools/rig/.venv/
 .DS_Store
 .superpowers/
-# images
-*.png
-*.jpg
-*.jpeg
-*.gif
-*.webp
-*.heic
-*.tif
-*.tiff
-*.bmp
-*.svg
-*.icns
 # local agent tooling
 .agents/
 .claude/
