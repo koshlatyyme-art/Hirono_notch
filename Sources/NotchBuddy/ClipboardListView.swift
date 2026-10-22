@@ -9,7 +9,7 @@ struct ClipboardListView: View {
         if model.accessDenied {
             message("Нет доступа к буферу. Разрешите вставку в Системных настройках → Конфиденциальность и безопасность")
         } else if model.history.items.isEmpty {
-            message("Скопируйте что-нибудь — я запомню последние 10")
+            message("Буфер обмена")
         } else {
             ScrollView {
                 LazyVStack(spacing: 4) {
