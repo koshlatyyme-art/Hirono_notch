@@ -7,3 +7,4 @@ tools/rig/.venv/
 .agents/
 .claude/
 skills-lock.json
+CLAUDE.md
