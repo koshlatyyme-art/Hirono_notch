@@ -31,7 +31,7 @@ HEART = [(596, 756), (614, 754), (624, 776), (622, 800), (630, 814), (620, 850),
 
 # Head's right edge: blue tube (head) vs alien (arm), then face edge vs strap/sleeve.
 HEAD_RIGHT_EDGE = [(712, 0), (712, 470), (662, 518), (636, 560), (640, 620), (650, 662)]
-NECK_SCAN_X = (280, 652)          # columns where the scarf bottom is detected
+NECK_SCAN_X = (280, 633)          # columns where the scarf bottom is detected (right of 633 it's robe)
 NECK_SCAN_FROM_Y = 700
 HEAD_LEFT_FLOOR_Y = 900           # left of the robe (x < 300) nothing of the body sits above the legs
 
